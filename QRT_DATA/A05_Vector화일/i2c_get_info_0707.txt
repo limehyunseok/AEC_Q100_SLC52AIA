@@ -1,0 +1,778 @@
+// ============================================================
+// I2C  WRITE + READ  Combined Vector  (Slave Addr 0x20)
+//   [1] WRITE 0x20  Data: 0x00 0xCA 0x01 0x00 0x09
+//   [gap] 약 6 ms 대기 (Bus Idle, SE_READY=Low)
+//   [2] READ  0x20  Data(15B): 0x10 0x0B 0x00 0x00 0x01 0x00 0x04 0x01 0x00 0x01 0x5A 0x5A 0x5B 0x90 0x00
+//
+//   * 전원 on 인가후 약 80ms 후에 수행 시도
+//   * SE Ready 신호는 SE에서 출력되는 신호이니 장비에서 읽는 신호입니다.
+//
+//   [규칙] ACK 직후 대기 SCL=0 / SCL 0-1-0 규칙화
+//          Read 데이터 비트는 Slave 구동 -> Tester는 L/H 로 compare
+//          각 read 바이트 후 Master ACK(0), 마지막만 Master NACK(1)
+//   [SE_READY] 그림 기준: WRITE 구간 H -> 대기+READ 구간 L -> READ 종료 후 H
+// ------------------------------------------------------------
+//   표기: 0/1 = Tester가 SCL/SDA를 Low/High로 구동
+//         L/H = Tester가 입력(읽기)으로 전환, Low/High 기대(compare)
+// ------------------------------------------------------------
+// SS	CD	LA
+// SCL	SDA	SE_READY
+// ============================================================
+// ############################################################
+// [1] WRITE Transaction  (SE_READY = H)
+// ############################################################
+1	1	H	// Bus Idle (SCL=1, SDA=1)
+1	0	H	// START Condition (SCL=1, SDA=1->0)
+0	0	H	// SCL Low  -> 첫 번째 Bit 준비
+// ==========================================
+// W1. WRITE [0x20]=Addr(0100000)+W(0)=0x40 + Slave ACK
+// ==========================================
+0	0	H	// Bit 7 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 6 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 3 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 1 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 0 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ==========================================
+// 첫 번째 ACK 직후 SCL Low 대기 구간 (SCL=0 유지, 약 9행)
+// ==========================================
+0	0	H	// 대기 1
+0	0	H	// 대기 2
+0	0	H	// 대기 3
+0	0	H	// 대기 4
+0	0	H	// 대기 5
+0	0	H	// 대기 6
+0	0	H	// 대기 7
+0	0	H	// 대기 8
+0	0	H	// 대기 9
+// ==========================================
+// W2. DATA 0x00 = 00000000 + Slave ACK
+// ==========================================
+0	0	H	// Bit 7 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 6 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 3 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 1 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 0 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ==========================================
+// W3. DATA 0xCA = 11001010 + Slave ACK
+// ==========================================
+0	1	H	// Bit 7 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	1	H	// Bit 6 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 3 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 1 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	0	H	// Bit 0 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ==========================================
+// W4. DATA 0x01 = 00000001 + Slave ACK
+// ==========================================
+0	0	H	// Bit 7 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 6 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 3 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 1 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 0 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ==========================================
+// W5. DATA 0x00 = 00000000 + Slave ACK
+// ==========================================
+0	0	H	// Bit 7 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 6 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 3 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 1 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 0 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ==========================================
+// W6. DATA 0x09 = 00001001 + Slave ACK
+// ==========================================
+0	0	H	// Bit 7 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 6 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 5 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 4 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 3 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+0	0	H	// Bit 2 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	0	H	// Bit 1 (0)  setup(SCL Low)
+1	0	H	// SCL High
+0	0	H	// SCL Low
+0	1	H	// Bit 0 (1)  setup(SCL Low)
+1	1	H	// SCL High
+0	1	H	// SCL Low
+// --- Slave ACK ---
+0	L	H	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	H	// ACK 확인 (SCL High)
+0	0	H	// SCL Low
+// ------ STOP Condition ------
+0	0	H	// SCL Low, SDA Low (STOP 준비)
+1	0	H	// SCL High
+1	1	H	// STOP Condition (SCL=1, SDA=0->1)
+1	1	H	// Bus Idle
+// ############################################################
+// [gap] WRITE <-> READ 사이 대기
+//   실제 시간 약 6ms (Bus Idle: SCL=1, SDA=1)
+//   SE_READY = Low (SE 처리중) -> 테스터에서 해당 지연 삽입
+// ############################################################
+1	1	X	// Idle 1 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 2 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 3 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 4 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 5 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 6 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 7 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 8 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 9 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 10 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 1 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 2 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 3 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 4 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 5 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 6 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 7 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 8 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 9 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 10 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 1 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 2 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 3 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 4 (6ms 구간, SE_READY Low)
+1	1	X	// Idle 5 (6ms 구간, SE_READY Low)
+// ############################################################
+// [2] READ Transaction  (SE_READY = L)
+// ############################################################
+1	1	X	// Bus Idle (SCL=1, SDA=1)
+1	0	X	// START Condition (SCL=1, SDA=1->0)
+0	0	X	// SCL Low  -> 첫 번째 Bit 준비
+// ==========================================
+// R0. READ [0x20]=Addr(0100000)+R(1)=0x41 + Slave ACK
+// ==========================================
+0	0	X	// Bit 7 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	1	X	// Bit 6 (1)  setup(SCL Low)
+1	1	X	// SCL High
+0	1	X	// SCL Low
+0	0	X	// Bit 5 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	0	X	// Bit 4 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	0	X	// Bit 3 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	0	X	// Bit 2 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	0	X	// Bit 1 (0)  setup(SCL Low)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+0	1	X	// Bit 0 (1)  setup(SCL Low)
+1	1	X	// SCL High
+0	1	X	// SCL Low
+// --- Slave ACK ---
+0	L	X	// ACK 준비 (SDA 해제 -> Slave가 0으로 당김)
+1	L	X	// ACK 확인 (SCL High)
+0	0	X	// SCL Low
+// ==========================================
+// 주소 ACK 직후 SCL Low 대기 구간 (SCL=0 유지, 약 9행)
+// ==========================================
+0	0	X	// 대기 1
+0	0	X	// 대기 2
+0	0	X	// 대기 3
+0	0	X	// 대기 4
+0	0	X	// 대기 5
+0	0	X	// 대기 6
+0	0	X	// 대기 7
+0	0	X	// 대기 8
+0	0	X	// 대기 9
+// ==========================================
+// READ DATA #1: 0x10 = 00010000
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 4 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #2: 0x0B = 00001011
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 3 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 1 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	H	X	// Bit 0 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #3: 0x00 = 00000000
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #4: 0x00 = 00000000
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #5: 0x01 = 00000001
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 0 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #6: 0x00 = 00000000
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #7: 0x04 = 00000100
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 2 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #8: 0x01 = 00000001
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 0 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #9: 0x00 = 00000000
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #10: 0x01 = 00000001
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 0 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #11: 0x5A = 01011010
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 6 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 4 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	H	X	// Bit 3 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 1 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #12: 0x5A = 01011010
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 6 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 4 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	H	X	// Bit 3 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 1 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #13: 0x5B = 01011011
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 6 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 4 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	H	X	// Bit 3 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 1 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	H	X	// Bit 0 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #14: 0x90 = 10010000
+// ==========================================
+0	H	X	// Bit 7 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	H	X	// Bit 4 (read 1)  slave 구동
+1	H	X	// SCL High (compare)
+0	H	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master ACK (다음 바이트 계속) ---
+0	0	X	// Master ACK (SDA Low 구동)
+1	0	X	// SCL High
+0	0	X	// SCL Low
+// ==========================================
+// READ DATA #15: 0x00 = 00000000  (LAST)
+// ==========================================
+0	L	X	// Bit 7 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 6 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 5 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 4 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 3 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 2 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 1 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+0	L	X	// Bit 0 (read 0)  slave 구동
+1	L	X	// SCL High (compare)
+0	L	X	// SCL Low
+// --- Master NACK (마지막 바이트) ---
+0	1	X	// Master NACK (SDA High 구동)
+1	1	X	// SCL High
+0	1	X	// SCL Low
+// ------ STOP Condition ------
+0	0	X	// SCL Low, SDA Low (STOP 준비)
+1	0	X	// SCL High
+1	1	X	// STOP Condition (SCL=1, SDA=0->1)
+1	1	X	// Bus Idle
